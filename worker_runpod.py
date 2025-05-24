@@ -89,9 +89,13 @@ def generate(input):
         image2 = LoadImage.load_image(input_image2)[0]
         conditioning_positive = CLIPTextEncode.encode(clip, positive_prompt)[0]
         conditioning_positive = FluxGuidance.append(conditioning_positive, guidance)[0]
-        clip_vision_conditioning1 = CLIPVisionEncode.encode(clip_vision, image1)[0]
+        
+        # Get crop method from input, default to "center"
+        crop_method = values.get('crop_method', 'center')
+        
+        clip_vision_conditioning1 = CLIPVisionEncode.encode(clip_vision, image1, crop_method)[0]
         style_vision_conditioning1 = StyleModelApply.apply_stylemodel(clip_vision_conditioning1, style_model, conditioning_positive)[0]
-        clip_vision_conditioning2 = CLIPVisionEncode.encode(clip_vision, image2)[0]
+        clip_vision_conditioning2 = CLIPVisionEncode.encode(clip_vision, image2, crop_method)[0]
         style_vision_conditioning2 = StyleModelApply.apply_stylemodel(clip_vision_conditioning2, style_model, style_vision_conditioning1)[0]
         unet_flux = ModelSamplingFlux.patch(unet, max_shift, base_shift, width, height)[0]
         noise = RandomNoise.get_noise(seed)[0]
